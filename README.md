@@ -25,18 +25,19 @@ This project is a web scraper designed to download manga from a manganato.com an
    cd manga-scraper
 
 2. **Create a virtual environment:**
+   ```sh
    python -m venv .venv
 
 3. **Activate the virtual environment:**
    - On Windows:
-   ```sh
-   .venv\Scripts\activate
+      ```sh
+      .venv\Scripts\activate
 
    - On macOS/Linux:
 
-   ```sh
-   source .venv/bin/activate
+      ```sh
+      source .venv/bin/activate
    
 4. **Activate the virtual environment:**
-  ```sh  
-    - pip install -r requirements.txt
+    ```sh  
+    pip install -r requirements.txt
