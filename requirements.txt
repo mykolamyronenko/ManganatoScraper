@@ -2,3 +2,5 @@ requests
 lxml
 Pillow
 tqdm
+customtkinter
+CTkMessagebox

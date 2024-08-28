@@ -4,6 +4,7 @@ from PIL import Image
 from tqdm import tqdm
 import re
 import requests
+
 def create_folder(folder_name):
     try:
         os.makedirs(folder_name, exist_ok=True)

@@ -2,18 +2,19 @@ import requests
 from lxml import html
 import logging
 import os
+import shutil
 from const import HEADERS, IMAGE_HEADERS
 from utils import create_folder, convert_images_to_pdf, folder_contains_images_and_pdf, download_with_progress
 
 class MangaScraper:
-    def __init__(self, url):
-        self.url = url
+    def __init__(self, urls):
+        self.urls = urls if isinstance(urls, list) else [urls]
         self.headers = HEADERS
         self.image_headers = IMAGE_HEADERS
 
-    def fetch_page_content(self):
+    def fetch_page_content(self, url):
         try:
-            response = requests.get(self.url, headers=self.headers)
+            response = requests.get(url, headers=self.headers)
             response.raise_for_status()
             return html.fromstring(response.content)
         except requests.RequestException as e:
@@ -31,7 +32,7 @@ class MangaScraper:
             images = img_tree.xpath('//div[@class="container-chapter-reader"]//img')
             for img in images:
                 img_url = img.get('src')
-                if img_url.endswith(('.webp', '.jpg', '.png')):
+                if img_url and img_url.endswith(('.webp', '.jpg', '.png')):
                     img_name = os.path.join(chapter_folder, os.path.basename(img_url))
                     download_with_progress(img_url, self.image_headers, img_name)
                     logging.info(f'Downloaded {img_name}')
@@ -39,32 +40,44 @@ class MangaScraper:
             logging.error(f"Error downloading images: {e}")
 
     def scrape(self):
-        tree = self.fetch_page_content()
-        if tree is None:
-            logging.error("Failed to fetch the webpage content.")
-            return
+        manga_folder = "Manga"
+        create_folder(manga_folder)
 
-        folder = tree.xpath('//h1/text()')[0]
-        logging.info(f'Creating folder: {folder}')
-        create_folder(folder)
-        chapters = self.get_chapters(tree)
-        logging.info(f'Found {len(chapters)} chapters.')
-
-        for chapter in chapters:
-            link = chapter.get('href')
-            logging.info(f'Processing chapter: {link}')
-            chapter_name = chapter.text_content().strip()
-            if ':' in chapter_name:
-                chapter_name = chapter_name.split(':')[0].strip()
-            chapter_folder = os.path.join(folder, chapter_name)
-            
-            if folder_contains_images_and_pdf(chapter_folder):
-                logging.info(f'Skipping chapter {chapter_name} as it already contains images and a PDF.')
+        for url in self.urls:
+            tree = self.fetch_page_content(url)
+            if tree is None:
+                logging.error("Failed to fetch the webpage content.")
                 continue
 
-            create_folder(chapter_folder)
-            self.download_images(link, chapter_folder)
-            pdf_path = os.path.join(chapter_folder, f"{chapter_name}.pdf")
-            convert_images_to_pdf(chapter_folder, pdf_path)
+            manga_name = tree.xpath('//h1/text()')[0]
+            manga_path = os.path.join(manga_folder, manga_name)
+            logging.info(f'Creating folder: {manga_path}')
+            create_folder(manga_path)
+
+            chapters = self.get_chapters(tree)
+            logging.info(f'Found {len(chapters)} chapters.')
+
+            pdf_folder = os.path.join(manga_path, " PDF Chapters")
+            create_folder(pdf_folder)
+
+            for chapter in chapters:
+                link = chapter.get('href')
+                logging.info(f'Processing chapter: {link}')
+                chapter_name = chapter.text_content().strip()
+                if ':' in chapter_name:
+                    chapter_name = chapter_name.split(':')[0].strip()
+                chapter_folder = os.path.join(manga_path, chapter_name)
+                
+                if folder_contains_images_and_pdf(chapter_folder):
+                    logging.info(f'Skipping chapter {chapter_name} as it already contains images and a PDF.')
+                    continue
+
+                create_folder(chapter_folder)
+                self.download_images(link, chapter_folder)
+                pdf_path = os.path.join(chapter_folder, f"{chapter_name}.pdf")
+                convert_images_to_pdf(chapter_folder, pdf_path)
+
+                # Copy the PDF to the new folder
+                shutil.copy(pdf_path, pdf_folder)
 
         logging.info('Done')
