@@ -16,6 +16,8 @@ This project is a web scraper designed to download manga from a manganato.com an
   - `lxml`
   - `Pillow`
   - `tqdm`
+  - `customtkinter`
+  - `CTkMessagebox`
 
 ## Installation
 
