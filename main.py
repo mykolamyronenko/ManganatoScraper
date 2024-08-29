@@ -4,8 +4,8 @@ from scraper import MangaScraper
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def start_scraping(urls):
-    scraper = MangaScraper(urls)
+def start_scraping(urls, progress_callback=None):
+    scraper = MangaScraper(urls, progress_callback)
     scraper.scrape()
 
 def main():

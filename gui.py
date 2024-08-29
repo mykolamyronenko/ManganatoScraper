@@ -2,6 +2,7 @@ import customtkinter as ctk
 import threading
 from CTkMessagebox import CTkMessagebox
 from main import start_scraping
+import os
 
 def run_gui():
     app = ctk.CTk()
@@ -9,41 +10,36 @@ def run_gui():
     app.title("Manga Scraper")
 
     def on_scrape_button_click():
-        url = url_entry.get()
-        file_path = file_entry.get()
-        if url:
-            threading.Thread(target=scrape_and_notify, args=([url],)).start()
-        elif file_path:
-            with open(file_path, 'r') as f:
+        input_text = url_or_file_entry.get()
+        if os.path.isfile(input_text):
+            with open(input_text, 'r') as f:
                 urls = [line.strip() for line in f.readlines()]
             threading.Thread(target=scrape_and_notify, args=(urls,)).start()
         else:
-            CTkMessagebox(title="Error", message="Please enter a URL or select a file.", icon="cancel")
+            threading.Thread(target=scrape_and_notify, args=([input_text],)).start()
 
     def scrape_and_notify(urls):
         try:
-            start_scraping(urls)
+            start_scraping(urls, update_progress)
             CTkMessagebox(title="Download Complete", message="All chapters have been downloaded successfully!")
         except Exception as e:
             CTkMessagebox(title="Error", message=f"An error occurred: {e}", icon="cancel")
 
-    guide_label = ctk.CTkLabel(app, text="Visit Manganato.com to get the manga link.")
+    def update_progress(value, max_value):
+        progress_bar.set(value / max_value)
+
+    guide_label = ctk.CTkLabel(app, text="Enter the URL of the manga or the path to a file with URLs:")
     guide_label.pack(pady=10)
 
-    url_label = ctk.CTkLabel(app, text="Enter the URL of the manga to scrape:")
-    url_label.pack(pady=10)
-
-    url_entry = ctk.CTkEntry(app, width=300)
-    url_entry.pack(pady=10)
-
-    file_label = ctk.CTkLabel(app, text="Or select a file with manga URLs:")
-    file_label.pack(pady=10)
-
-    file_entry = ctk.CTkEntry(app, width=300)
-    file_entry.pack(pady=10)
+    url_or_file_entry = ctk.CTkEntry(app, width=300)
+    url_or_file_entry.pack(pady=10)
 
     scrape_button = ctk.CTkButton(app, text="Scrape", command=on_scrape_button_click)
     scrape_button.pack(pady=10)
+
+    progress_bar = ctk.CTkProgressBar(app, width=300)
+    progress_bar.pack(pady=10)
+    progress_bar.set(0)
 
     app.mainloop()
 

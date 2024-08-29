@@ -7,10 +7,11 @@ from const import HEADERS, IMAGE_HEADERS
 from utils import create_folder, convert_images_to_pdf, folder_contains_images_and_pdf, download_with_progress
 
 class MangaScraper:
-    def __init__(self, urls):
+    def __init__(self, urls, progress_callback=None):
         self.urls = urls if isinstance(urls, list) else [urls]
         self.headers = HEADERS
         self.image_headers = IMAGE_HEADERS
+        self.progress_callback = progress_callback
 
     def fetch_page_content(self, url):
         try:
@@ -57,10 +58,10 @@ class MangaScraper:
             chapters = self.get_chapters(tree)
             logging.info(f'Found {len(chapters)} chapters.')
 
-            pdf_folder = os.path.join(manga_path, " PDF Chapters")
+            pdf_folder = os.path.join(manga_path, "Pdf Chapters")
             create_folder(pdf_folder)
 
-            for chapter in chapters:
+            for i, chapter in enumerate(chapters):
                 link = chapter.get('href')
                 logging.info(f'Processing chapter: {link}')
                 chapter_name = chapter.text_content().strip()
@@ -79,5 +80,9 @@ class MangaScraper:
 
                 # Copy the PDF to the new folder
                 shutil.copy(pdf_path, pdf_folder)
+
+                # Update progress
+                if self.progress_callback:
+                    self.progress_callback(i + 1, len(chapters))
 
         logging.info('Done')
