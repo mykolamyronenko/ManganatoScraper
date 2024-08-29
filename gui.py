@@ -21,7 +21,7 @@ def run_gui():
     def scrape_and_notify(urls):
         try:
             start_scraping(urls, update_progress)
-            CTkMessagebox(title="Download Complete", message="All chapters have been downloaded successfully!")
+            CTkMessagebox(title="Download Complete", message="All chapters have been downloaded successfully!",icon="check")
         except Exception as e:
             CTkMessagebox(title="Error", message=f"An error occurred: {e}", icon="cancel")
 
@@ -34,7 +34,7 @@ def run_gui():
     url_or_file_entry = ctk.CTkEntry(app, width=300)
     url_or_file_entry.pack(pady=10)
 
-    scrape_button = ctk.CTkButton(app, text="Scrape", command=on_scrape_button_click)
+    scrape_button = ctk.CTkButton(app, text="Download", command=on_scrape_button_click)
     scrape_button.pack(pady=10)
 
     progress_bar = ctk.CTkProgressBar(app, width=300)

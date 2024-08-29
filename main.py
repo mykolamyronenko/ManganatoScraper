@@ -20,7 +20,6 @@ def main():
         from gui import run_gui
         run_gui()
     elif args.url:
-        print("Visit Manganato.com to get the manga link.")
         start_scraping(args.url)
     elif args.file:
         with open(args.file, 'r') as f:

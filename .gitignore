@@ -22,4 +22,7 @@ config.json
 .DS_Store
 Thumbs.db
 
-Manga/
+manga/
+
+build/
+dist/
