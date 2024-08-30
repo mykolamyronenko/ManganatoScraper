@@ -23,8 +23,8 @@ This project is a web scraper designed to download manga from a manganato.com an
 
 1. **Clone the repository:**
    ```
-   git clone https://github.com/your-username/manga-scraper.git
-   cd manga-scraper
+   git clone https://github.com/mykolamyronenko/ManganatoScraper.git
+   cd ManganatoScraper
    ```
 
 2. **Create a virtual environment:**
